@@ -42,41 +42,47 @@ define rootless::java (
 ){
 
   case $ensure {
+    true: {
+      $real_ensure = true
+    }
     /present|true/: {
-      $real_ensure = 'true'
+      $real_ensure = true
+    }
+    false: {
+      $real_ensure = false
     }
     /absent|false/: {
-      $real_ensure = 'false'
+      $real_ensure = false
     }
     default: {
       fail("ensure: ${ensure} not supported.")
     }
   }
 
-  if $real_ensure == 'true' {
+  if $real_ensure {
     if $tarball_directory == '' {
-      fail("When installing java, a tarball_directory must be specified.")
+      fail('When installing java, a tarball_directory must be specified.')
     }
     if $java_file != '' {
       if $java_install_dir == '' {
-        fail("When specifying a tarball via java_file, you must also speciy a java_install_dir, the directory created by the untar")
+        fail('When specifying a tarball via java_file, you must also speciy a java_install_dir, the directory created by the untar')
       }
     }
   }
 
-  case $architecture {
+  case $::architecture {
     'x86_64': { $java_arch = 'x64' }
     'i386':   { $java_arch = 'i586' }
     default:  {
-      fail("Arch: ${arch} not supported, please add it.")
+      fail("Arch: ${::architecture} not supported, please add it.")
     }
   }
 
   $java_cmp_ver = "${java_major_version}u${java_update_version}"
 
   if $java_file == '' {
-    $java_name = "jdk-${java_cmp_ver}-${kernel}-${java_arch}"
-    $juv_fmt = inline_template("<%= @java_update_version.to_s.rjust(2, '0') %>")
+    $java_name = "jdk-${java_cmp_ver}-${::kernel}-${java_arch}"
+    $juv_fmt = inline_template('<%= @java_update_version.to_s.rjust(2, '0') %>')
     $java_create_dir = "jdk-1.${java_major_version}.0_${juv_fmt}"
   } else {
     $java_name = $java_file
@@ -86,7 +92,7 @@ define rootless::java (
 
 
 
-  if $real_ensure == 'true' {
+  if $real_ensure {
 
     exec {"create-java-install-${install_root}":
       command => "/bin/tar xvzf ${tarball_directory}/${java_name}",
@@ -95,10 +101,10 @@ define rootless::java (
     }
 
   }
-  elsif $real_ensure == 'false' {
+  elsif ! $real_ensure {
 
     exec {"create-java-install-${install_root}":
-      command => "/bin/rm -fr $java_create_dir",
+      command => "/bin/rm -fr ${java_create_dir}",
       cwd     => $install_root,
       onlyif  => "/usr/bin/stat ${install_root}/${java_create_dir}",
     }
