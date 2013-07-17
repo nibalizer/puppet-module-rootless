@@ -60,6 +60,8 @@ define rootless::java (
     if $java_file != '' {
       if $java_install_dir == '' {
         fail("When specifying a tarball via java_file, you must also speciy a java_install_dir, the directory created by the untar")
+      }
+    }
   }
 
   case $architecture {
