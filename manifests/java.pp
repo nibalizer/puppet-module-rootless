@@ -17,6 +17,7 @@
 #   ensure            => present,
 #   tarball_directory => '/big/nfs/mount',
 #   java_file         => 'my-special-jdk-tarball.tar.gz',
+#   java_create_dir   => 'jdk-1.7.0_09',    # the directory created by the untar operation
 # }
 
 # rootless::java { '/opt/app/yet_another_place/':
@@ -56,7 +57,9 @@ define rootless::java (
     if $tarball_directory == '' {
       fail("When installing java, a tarball_directory must be specified.")
     }
-
+    if $java_file != '' {
+      if $java_install_dir == '' {
+        fail("When specifying a tarball via java_file, you must also speciy a java_install_dir, the directory created by the untar")
   }
 
   case $architecture {
@@ -71,14 +74,15 @@ define rootless::java (
 
   if $java_file == '' {
     $java_name = "jdk-${java_cmp_ver}-${kernel}-${java_arch}"
+    $juv_fmt = inline_template("<%= @java_update_version.to_s.rjust(2, '0') %>")
+    $java_create_dir = "jdk-1.${java_major_version}.0_${juv_fmt}"
   } else {
     $java_name = $java_file
+    $java_create_dir = $java_install_dir
   }
 
-  $juv_fmt = inline_template("<%= @java_update_version.to_s.rjust(2, '0') %>")
 
 
-  $java_create_dir = "jdk-1.${java_major_version}.0_${juv_fmt}"
 
   if $real_ensure == 'true' {
 
