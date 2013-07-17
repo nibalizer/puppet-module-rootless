@@ -80,10 +80,12 @@ define rootless::java (
 
   $java_cmp_ver = "${java_major_version}u${java_update_version}"
 
+  $dwnkernel = downcase($::kernel)
+
   if $java_file == '' {
-    $java_name = "jdk-${java_cmp_ver}-${::kernel}-${java_arch}"
-    $juv_fmt = inline_template('<%= @java_update_version.to_s.rjust(2, '0') %>')
-    $java_create_dir = "jdk-1.${java_major_version}.0_${juv_fmt}"
+    $java_name = "jdk-${java_cmp_ver}-${dwnkernel}-${java_arch}.tar.gz"
+    $juv_fmt = inline_template('<%= @java_update_version.to_s.rjust(2, "0") %>')
+    $java_create_dir = "jdk1.${java_major_version}.0_${juv_fmt}"
   } else {
     $java_name = $java_file
     $java_create_dir = $java_install_dir
@@ -103,7 +105,7 @@ define rootless::java (
   }
   elsif ! $real_ensure {
 
-    exec {"create-java-install-${install_root}":
+    exec {"remove-java-install-${install_root}":
       command => "/bin/rm -fr ${java_create_dir}",
       cwd     => $install_root,
       onlyif  => "/usr/bin/stat ${install_root}/${java_create_dir}",
