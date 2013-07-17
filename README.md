@@ -23,3 +23,8 @@ writeable by the user running puppet.
       notify  => Service['httpd'],
     }
 
+
+
+#Requirements
+
+* puppetlabs-stdlib
