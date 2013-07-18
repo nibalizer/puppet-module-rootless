@@ -23,6 +23,23 @@ writeable by the user running puppet.
       notify  => Service['httpd'],
     }
 
+###rootless::tardir
+
+A type that will untar a tarfile that contains a directory. The tarfile must be local
+or nfs mounted and the tarball must create a single directory (for purging to work).
+Additionally the folder that is being created must be known ahead of time. This is a
+base type that can be leveraged to make a more complex behavior.
+
+    rootless::tardir { '/opt/app/place/folder':
+      ensure  => absent,
+      tarfile => '/big/nfs/mount/tar.tar.gz'
+    }
+
+    rootless::tardir { '/opt/app/other_place/folder':
+      ensure  => present,
+      tarfile => '/big/nfs/mount/tar.tar.gz'
+    }
+
 ###rootless::jdk
 
 A type that will install a jdk based on major and minor version number from
@@ -54,7 +71,6 @@ a tarball found somewhere else on the filesystem(often an nfs mount).
       tarball_directory   => '/big/nfs/mount',
       install_root        => '/opt/app/best_place',
     }
-
 
 ##Facts
 
